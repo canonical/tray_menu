@@ -34,6 +34,9 @@ set_target_properties(${PLUGIN_NAME} PROPERTIES
   CXX_VISIBILITY_PRESET hidden)
 target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
 
+# Disable deprecation warnings to handle app_indicator_new deprecation
+target_compile_options(${PLUGIN_NAME} PRIVATE -Wno-deprecated-declarations)
+
 # Source include directories and library dependencies. Add any plugin-specific
 # dependencies here.
 pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-3.0)
