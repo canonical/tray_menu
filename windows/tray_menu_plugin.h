@@ -4,6 +4,9 @@
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_windows.h>
 
+#include <memory>
+#include <unordered_map>
+
 namespace tray_menu {
 class TrayMenuPlugin : public flutter::Plugin {
 public:
@@ -36,6 +39,7 @@ public:
     UINT proc_delegate_id;
     NOTIFYICONDATA nid = {sizeof(NOTIFYICONDATA)};
     HMENU menu         = CreatePopupMenu();
+    std::unordered_map<UINT, HMENU> parents;
     static HBITMAP unchecked_bitmap;
 };
 }// namespace tray_menu
