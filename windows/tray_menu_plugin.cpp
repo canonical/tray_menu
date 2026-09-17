@@ -147,7 +147,7 @@ void TrayMenuPlugin::show_tray_icon(const flutter::EncodableValue* args, flutter
     result.Success();
 }
 
-HMENU get_parent_or_default(UINT handle, const std::unordered_map<UINT, HMENU> parents, HMENU default_value) {
+HMENU get_parent_or_default(UINT handle, const std::unordered_map<UINT, HMENU>& parents, HMENU default_value) {
     auto it = parents.find(handle);
     return it != parents.end() ? it->second : default_value;
 }
