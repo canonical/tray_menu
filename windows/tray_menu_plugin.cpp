@@ -132,6 +132,8 @@ void TrayMenuPlugin::init(const flutter::EncodableValue* args, flutter::MethodRe
     DestroyIcon(nid.hIcon);
     Shell_NotifyIcon(NIM_DELETE, &nid);
     DestroyMenu(menu);
+    parents.clear();
+
     menu = CreatePopupMenu();
     result.Success();
 }
@@ -145,11 +147,16 @@ void TrayMenuPlugin::show_tray_icon(const flutter::EncodableValue* args, flutter
     result.Success();
 }
 
+HMENU get_parent_or_default(UINT handle, const std::unordered_map<UINT, HMENU>& parents, HMENU default_value) {
+    auto it = parents.find(handle);
+    return it != parents.end() ? it->second : default_value;
+}
+
 MENUITEMINFO create_label_menu_item(const flutter::EncodableMap& args) {
     auto label         = ConvertUft8ToUtf16(std::get<std::string>(args.at(flutter::EncodableValue{"label"})));
     const auto enabled = std::get<bool>(args.at(flutter::EncodableValue{"enabled"}));
     MENUITEMINFO item  = {sizeof(MENUITEMINFO)};
-    item.fMask |= MIIM_ID | MIIM_STRING;
+    item.fMask |= MIIM_ID | MIIM_STATE | MIIM_STRING;
     item.fState     = enabled ? MFS_ENABLED : MFS_DISABLED;
     item.dwTypeData = _wcsdup(label.c_str());
     item.cch        = static_cast<UINT>(label.length());
@@ -206,9 +213,11 @@ void TrayMenuPlugin::add_menu_item(const flutter::EncodableValue* args, flutter:
 
     if (const auto submenu_value = map.find(flutter::EncodableValue{"submenu"}); submenu_value != map.end()) {
         const auto submenu_item_handle = static_cast<UINT>(std::get<int32_t>(submenu_value->second));
+        const auto parent              = get_parent_or_default(submenu_item_handle, parents, menu);
+
         MENUITEMINFO item              = {sizeof(MENUITEMINFO)};
         item.fMask                     = MIIM_SUBMENU;
-        GetMenuItemInfo(menu, submenu_item_handle, false, &item);
+        GetMenuItemInfo(parent, submenu_item_handle, false, &item);
         parent_menu = item.hSubMenu;
     }
 
@@ -220,64 +229,87 @@ void TrayMenuPlugin::add_menu_item(const flutter::EncodableValue* args, flutter:
     InsertMenuItem(parent_menu, static_cast<UINT>(before), false, &item);
     free(item.dwTypeData);
 
+    parents.emplace(item.wID, parent_menu);
+
     result.Success(flutter::EncodableValue(static_cast<int32_t>(item.wID)));
 }
 
 void TrayMenuPlugin::remove_menu_item(const flutter::EncodableValue* args, flutter::MethodResult<>& result) {
     const auto handle = static_cast<UINT>(std::get<int32_t>(*args));
-    DeleteMenu(menu, handle, MF_BYCOMMAND);
+
+    auto it = parents.find(handle);
+    if (it != parents.end()) {
+        DeleteMenu(it->second, handle, MF_BYCOMMAND);
+        parents.erase(it);
+    }
+    else {
+        DeleteMenu(menu, handle, MF_BYCOMMAND);
+    }
+
     result.Success();
 }
 
 void TrayMenuPlugin::get_menu_item_label(const flutter::EncodableValue* args, flutter::MethodResult<>& result) {
     const auto handle = std::get<int32_t>(*args);
+    const auto parent = get_parent_or_default(handle, parents, menu);
+
     MENUITEMINFO item = {sizeof(MENUITEMINFO)};
     item.fMask        = MIIM_STRING;
     item.dwTypeData   = nullptr;
-    GetMenuItemInfo(menu, handle, false, &item);
+    GetMenuItemInfo(parent, handle, false, &item);
     std::wstring buffer(item.cch++, L'0');
     item.dwTypeData = buffer.data();
-    GetMenuItemInfo(menu, handle, false, &item);
+    GetMenuItemInfo(parent, handle, false, &item);
     result.Success(flutter::EncodableValue{ConvertUtf16ToUtf8({item.dwTypeData, item.cch})});
 }
 
 void TrayMenuPlugin::set_menu_item_label(const flutter::EncodableValue* args, flutter::MethodResult<>& result) {
     const auto& map   = std::get<flutter::EncodableMap>(*args);
     const auto handle = std::get<int32_t>(map.at(flutter::EncodableValue{"handle"}));
+    const auto parent = get_parent_or_default(handle, parents, menu);
+
     auto label        = ConvertUft8ToUtf16(std::get<std::string>(map.at(flutter::EncodableValue{"label"})));
     MENUITEMINFO item = {sizeof(MENUITEMINFO)};
     item.fMask        = MIIM_STRING;
     item.dwTypeData   = label.data();
     item.cch          = static_cast<UINT>(label.length());
-    SetMenuItemInfo(menu, handle, false, &item);
+    SetMenuItemInfo(parent, handle, false, &item);
     result.Success();
 }
 
 void TrayMenuPlugin::get_menu_item_enabled(const flutter::EncodableValue* args, flutter::MethodResult<>& result) {
-    const auto handle  = std::get<int32_t>(*args);
-    const auto enabled = !(MFS_DISABLED & GetMenuState(menu, handle, MF_BYCOMMAND));
+    const auto handle = std::get<int32_t>(*args);
+    const auto parent = get_parent_or_default(handle, parents, menu);
+
+    const auto enabled = !(MFS_DISABLED & GetMenuState(parent, handle, MF_BYCOMMAND));
     result.Success(flutter::EncodableValue{enabled});
 }
 
 void TrayMenuPlugin::set_menu_item_enabled(const flutter::EncodableValue* args, flutter::MethodResult<>& result) {
-    const auto& map    = std::get<flutter::EncodableMap>(*args);
-    const auto handle  = std::get<int32_t>(map.at(flutter::EncodableValue{"handle"}));
+    const auto& map   = std::get<flutter::EncodableMap>(*args);
+    const auto handle = std::get<int32_t>(map.at(flutter::EncodableValue{"handle"}));
+    const auto parent = get_parent_or_default(handle, parents, menu);
+
     const auto enabled = std::get<bool>(map.at(flutter::EncodableValue{"enabled"}));
-    EnableMenuItem(menu, handle, enabled ? MF_ENABLED : MF_DISABLED);
+    EnableMenuItem(parent, handle, enabled ? MF_ENABLED : MF_DISABLED);
     result.Success();
 }
 
 void TrayMenuPlugin::get_menu_item_checked(const flutter::EncodableValue* args, flutter::MethodResult<>& result) {
-    const auto handle  = std::get<int32_t>(*args);
-    const auto checked = !!(MFS_CHECKED & GetMenuState(menu, handle, MF_BYCOMMAND));
+    const auto handle = std::get<int32_t>(*args);
+    const auto parent = get_parent_or_default(handle, parents, menu);
+
+    const auto checked = !!(MFS_CHECKED & GetMenuState(parent, handle, MF_BYCOMMAND));
     result.Success(flutter::EncodableValue{checked});
 }
 
 void TrayMenuPlugin::set_menu_item_checked(const flutter::EncodableValue* args, flutter::MethodResult<>& result) {
-    const auto& map    = std::get<flutter::EncodableMap>(*args);
-    const auto handle  = std::get<int32_t>(map.at(flutter::EncodableValue{"handle"}));
+    const auto& map   = std::get<flutter::EncodableMap>(*args);
+    const auto handle = std::get<int32_t>(map.at(flutter::EncodableValue{"handle"}));
+    const auto parent = get_parent_or_default(handle, parents, menu);
+
     const auto checked = std::get<bool>(map.at(flutter::EncodableValue{"checked"}));
-    CheckMenuItem(menu, handle, checked ? MF_CHECKED : MF_UNCHECKED);
+    CheckMenuItem(parent, handle, checked ? MF_CHECKED : MF_UNCHECKED);
     result.Success();
 }
 }// namespace tray_menu
