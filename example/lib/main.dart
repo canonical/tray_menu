@@ -21,16 +21,16 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     await TrayMenu.instance.addSeparator('sep');
     await TrayMenu.instance
-        .addLabel('bbb', label: 'bbb', callback: (key, _) => print(key));
+        .addLabel('bbb', label: 'bbb', callback: (key, _) => debugPrint(key));
     await TrayMenu.instance
         .addSubmenu('ccc', label: 'submenu', before: 'sep')
         .then((menu) async {
       await menu.addLabel('aaa',
-          label: 'aaa', callback: (key, _) => print(key));
+          label: 'aaa', callback: (key, _) => debugPrint(key));
       await menu.addLabel('ccc',
-          label: 'ccc', callback: (key, _) => print(key));
+          label: 'ccc', callback: (key, _) => debugPrint(key));
       await menu.addLabel('bbb',
-          label: 'bbb', before: 'ccc', callback: (key, _) => print(key));
+          label: 'bbb', before: 'ccc', callback: (key, _) => debugPrint(key));
     });
     await TrayMenu.instance.show('/home/andrei/icon.ico');
     Timer(const Duration(seconds: 10), () {
@@ -38,11 +38,11 @@ class _MyHomePageState extends State<MyHomePage> {
           .addSubmenu('ddd', label: 'submenu 2', before: 'sep')
           .then((menu) async {
         await menu.addLabel('aaa',
-            label: 'aaa', callback: (key, _) => print(key));
+            label: 'aaa', callback: (key, _) => debugPrint(key));
         await menu.addLabel('ccc',
-            label: 'ccc', callback: (key, _) => print(key));
+            label: 'ccc', callback: (key, _) => debugPrint(key));
         await menu.addLabel('bbb',
-            label: 'bbb', before: 'ccc', callback: (key, _) => print(key));
+            label: 'bbb', before: 'ccc', callback: (key, _) => debugPrint(key));
       });
     });
   }
