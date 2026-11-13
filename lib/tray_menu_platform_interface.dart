@@ -28,6 +28,8 @@ abstract class TrayMenuPlatform extends PlatformInterface {
 
   Future<void> show(String iconPath) => throw UnimplementedError();
 
+  // _MenuItem is internal; users only deal with the public MenuItem types.
+  // ignore: library_private_types_in_public_api
   Future<int> add(_MenuItem item, {int? submenu, int? before}) =>
       throw UnimplementedError();
 
