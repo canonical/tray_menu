@@ -24,7 +24,7 @@ abstract class TrayMenuPlatform extends PlatformInterface {
   void setCallbackHandler(Future<dynamic> Function(MethodCall) callback) =>
       throw UnimplementedError();
 
-Future<void> init() => throw UnimplementedError();
+  Future<void> init() => throw UnimplementedError();
 
   Future<void> show(String iconPath) => throw UnimplementedError();
 
