@@ -9,4 +9,5 @@
     "schedule": "every 2 weeks on Monday",
     "commitMessagePrefix": "[deps] ",
     "minimumReleaseAge": "5 days",
+    // The Flutter SDK pinned in .fvmrc is updated by the built-in `fvm` manager.
 }
