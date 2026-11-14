@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'tray_menu'
-  s.version          = '0.0.1'
+  s.version          = '0.1.0'
   s.summary          = 'System tray icons and menus for Flutter desktop apps.'
   s.description      = <<-DESC
 A Flutter plugin for system tray icons and menus on Linux, macOS and Windows.
