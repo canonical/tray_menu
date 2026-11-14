@@ -10,8 +10,6 @@
 #include <string>
 #include <unordered_map>
 
-#include "tray_menu_plugin_private.h"
-
 #define TRAY_MENU_PLUGIN(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), tray_menu_plugin_get_type(), TrayMenuPlugin))
 
 struct IndexedMenu : public Gtk::Menu {

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:tray_menu/tray_menu.dart';
 
 void main() {
@@ -15,27 +15,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   Future<void> initTrayMenu() async {
     await TrayMenu.instance.addLabel('aaa', label: 'aaa', callback: (key, _) {
       TrayMenu.instance.get<MenuItemSubmenu>('ccc')?.remove('aaa');
     });
     await TrayMenu.instance.addSeparator('sep');
     await TrayMenu.instance
-        .addLabel('bbb', label: 'bbb', callback: (key, _) => print(key));
+        .addLabel('bbb', label: 'bbb', callback: (key, _) => debugPrint(key));
     await TrayMenu.instance
         .addSubmenu('ccc', label: 'submenu', before: 'sep')
         .then((menu) async {
       await menu.addLabel('aaa',
-          label: 'aaa', callback: (key, _) => print(key));
+          label: 'aaa', callback: (key, _) => debugPrint(key));
       await menu.addLabel('ccc',
-          label: 'ccc', callback: (key, _) => print(key));
+          label: 'ccc', callback: (key, _) => debugPrint(key));
       await menu.addLabel('bbb',
-          label: 'bbb', before: 'ccc', callback: (key, _) => print(key));
+          label: 'bbb', before: 'ccc', callback: (key, _) => debugPrint(key));
     });
     await TrayMenu.instance.show('/home/andrei/icon.ico');
     Timer(const Duration(seconds: 10), () {
@@ -43,11 +38,11 @@ class _MyHomePageState extends State<MyHomePage> {
           .addSubmenu('ddd', label: 'submenu 2', before: 'sep')
           .then((menu) async {
         await menu.addLabel('aaa',
-            label: 'aaa', callback: (key, _) => print(key));
+            label: 'aaa', callback: (key, _) => debugPrint(key));
         await menu.addLabel('ccc',
-            label: 'ccc', callback: (key, _) => print(key));
+            label: 'ccc', callback: (key, _) => debugPrint(key));
         await menu.addLabel('bbb',
-            label: 'bbb', before: 'ccc', callback: (key, _) => print(key));
+            label: 'bbb', before: 'ccc', callback: (key, _) => debugPrint(key));
       });
     });
   }

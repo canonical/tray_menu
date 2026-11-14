@@ -19,6 +19,7 @@ class MethodChannelTrayMenu extends TrayMenuPlatform {
       methodChannel.invokeMethod('showTrayIcon', iconPath);
 
   @override
+  // ignore: library_private_types_in_public_api
   Future<int> add(_MenuItem item, {int? submenu, int? before}) async {
     final handle = await methodChannel.invokeMethod<int>(
       'addMenuItem',

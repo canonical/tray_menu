@@ -5,13 +5,13 @@
 Pod::Spec.new do |s|
   s.name             = 'tray_menu'
   s.version          = '0.0.1'
-  s.summary          = 'A new Flutter plugin project.'
+  s.summary          = 'System tray icons and menus for Flutter desktop apps.'
   s.description      = <<-DESC
-A new Flutter plugin project.
+A Flutter plugin for system tray icons and menus on Linux, macOS and Windows.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/canonical/tray_menu'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = 'Canonical Ltd.'
 
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'
