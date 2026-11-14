@@ -1,6 +1,6 @@
 name: tray_menu
 description: A Flutter plugin for system tray icons and menus on Linux, macOS and Windows.
-version: 0.0.1
+version: 0.1.0
 homepage: https://github.com/canonical/tray_menu
 
 environment:
